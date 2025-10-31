@@ -1,0 +1,15 @@
+{
+  "transfer": {
+    "arrival_status": {
+      "pending": "未到貨",
+      "partial_received": "部分到貨",
+      "received": "已到貨"
+    },
+    "status": {
+      "open": "新開單",
+      "transferring": "調撥中",
+      "completed": "已入庫",
+      "cancelled": "已取消"
+    }
+  }
+}

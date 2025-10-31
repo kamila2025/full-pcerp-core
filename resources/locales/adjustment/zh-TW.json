@@ -1,0 +1,16 @@
+{
+  "adjustment": {
+    "status": {
+      "open": "新開單",
+      "in_progress": "盤點中",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    },
+    "result": {
+      "incomplete": "未完成",
+      "match": "符合",
+      "unmatch": "不符合",
+      "corrected": "已校正"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "inventory-log": {
+    "type": {
+      "product_created": "商品建立",
+      "product_updated": "商品更新",
+      "variant_deleted": "規格刪除",
+      "product_bulk_updated": "批量商品更新",
+      "inventory_created": "庫存建立",
+      "inventory_updated": "庫存更新",
+      "inventory_bulk_updated": "批量庫存更新",
+      "product_transaction": "商品交易",
+      "product_transaction_edit": "編輯商品交易",
+      "product_transaction_deleted": "刪除商品交易",
+      "purchase_order_completed": "進貨單",
+      "purchase_order_cancelled": "進貨單取消",
+      "purchase_return_order_completed": "退貨單",
+      "inventory_adjustment_corrected": "盤點單校正",
+      "inventory_transfer_in": "調撥單入庫",
+      "inventory_transfer_out": "調撥單移出",
+      "inventory_transfer_cancel": "調撥單取消",
+      "inventory_transfer_return": "調撥單歸還"
+    }
+  }
+}

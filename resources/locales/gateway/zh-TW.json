@@ -1,0 +1,22 @@
+{
+  "gateway": {
+    "method": {
+      "gomypay_credit_card": "一次付清",
+      "gomypay_credit_card_3": "3期",
+      "gomypay_credit_card_6": "6期",
+      "gomypay_credit_card_9": "9期",
+      "gomypay_credit_card_12": "12期",
+      "gomypay_credit_card_18": "18期",
+      "gomypay_credit_card_24": "24期",
+      "gomypay_credit_card_30": "30期",
+      "ccatpay_credit_card": "一次付清",
+      "ccatpay_credit_card_3": "3期",
+      "ccatpay_credit_card_6": "6期",
+      "ccatpay_credit_card_9": "9期",
+      "ccatpay_credit_card_12": "12期",
+      "ccatpay_credit_card_18": "18期",
+      "ccatpay_credit_card_24": "24期",
+      "ccatpay_credit_card_30": "30期"
+    }
+  }
+}

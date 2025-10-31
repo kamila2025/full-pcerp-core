@@ -1,0 +1,27 @@
+{
+  "order": {
+    "fulfillment": {
+      "unfulfilled": "未出貨",
+      "partially_fulfilled": "部分出貨",
+      "fulfilled": "已出貨",
+      "restocked": "已退貨",
+      "any": "全部",
+      "all": "全部訂單",
+      "pickup": "取貨",
+      "partially_delivered": "部分已送達",
+      "delivered": "已送達",
+      "mark_as_pickup": "標記為已取貨",
+      "ready_for_pickup": "準備取貨",
+      "customer_picked_up": "客户已取貨"
+    },
+    "payment": {
+      "unpaid": "未付款",
+      "pending": "待付款",
+      "partially_paid": "部分付款",
+      "paid": "已付款",
+      "refunded": "已退款",
+      "cancelled": "已取消",
+      "authorized": "已授權"
+    }
+  }
+}

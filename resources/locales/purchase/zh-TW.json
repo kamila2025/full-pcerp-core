@@ -1,0 +1,21 @@
+{
+  "purchase": {
+    "type": {
+      "purchase": "進貨",
+      "return": "退貨"
+    },
+    "arrival_status": {
+      "pending_to_receive": "未到貨",
+      "partial": "部分到貨",
+      "all_received": "已到貨",
+      "pending_to_return": "未退貨",
+      "all_returned": "已退貨"
+    },
+    "status": {
+      "open": "新開單",
+      "pending": "進貨中",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    }
+  }
+}

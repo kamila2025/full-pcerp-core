@@ -1,0 +1,9 @@
+{
+  "customer": {
+    "status": {
+      "verified": "已驗證",
+      "unverified": "未驗證",
+      "blacklisted": "被列入黑名單"
+    }
+  }
+}
