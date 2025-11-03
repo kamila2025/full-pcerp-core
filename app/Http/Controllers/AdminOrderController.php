@@ -501,7 +501,17 @@ class AdminOrderController extends Controller
             DB::transaction(function () use ($attributes, $id) {
                 $gateway = Gateway::find($attributes['gateway_id']);
 
-                $subGateway = current(array_filter($gateway['sub_gateways'], fn ($item) => $item['gateway_method'] === $attributes['method']));
+                $subGateways = $gateway->sub_gateways ?? [];
+
+                $subGateway = null;
+                if (!empty($attributes['method'])) {
+                    $subGateway = collect($subGateways)->first(
+                        fn ($item) => is_array($item) && ($item['gateway_method'] ?? null) === $attributes['method']
+                    );
+                }
+
+                $feeRate = is_array($subGateway) ? (float) ($subGateway['fee_rate'] ?? 0) : 0;
+                $fee = (float) $attributes['amount'] * ($feeRate / 100);
 
                 Transaction::create([
                     'order_id'          => $id,
@@ -509,7 +519,7 @@ class AdminOrderController extends Controller
                     'gateway_title'     => $gateway->title,
                     'gateway_method'    => $attributes['method'] ?? null,
                     'amount'            => $attributes['amount'],
-                    'fee'               => $attributes['amount'] * ($subGateway['fee_rate'] / 100),
+                    'fee'               => $fee,
                     'note'              => $attributes['note'] ?? null,
                     'reference'         => $attributes['reference'] ?? null,
                     'additional'        => $attributes['additional'] ?? null,
