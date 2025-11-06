@@ -117,9 +117,19 @@ class AdminProductController extends Controller
     {
         Gate::authorize(PermissionNameEnum::所有商品);
 
+        $brandsQuery = Tag::query()->where('type', 'brands');
+        
+        $brands = match (config('database.default')) {
+            'mysql' => $brandsQuery->select('id', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(name, '$." . app()->getLocale() . "')) as name_display"))->get()->pluck('name_display', 'id'),
+            'sqlite' => $brandsQuery->select('id', DB::raw("json_extract(name, '$." . app()->getLocale() . "') as name_display"))->get()->pluck('name_display', 'id'),
+            default => $brandsQuery->pluck('name', 'id'),
+        };
+
         return Inertia::render('Product/CreateOrEdit', [
             'locations' => Location::query()
                 ->get(),
+            'categories' => Category::query()->pluck('name', 'id'),
+            'brands' => $brands,
         ]);
     }
 
@@ -168,6 +178,14 @@ class AdminProductController extends Controller
     {
         Gate::authorize(PermissionNameEnum::所有商品);
 
+        $brandsQuery = Tag::query()->where('type', 'brands');
+        
+        $brands = match (config('database.default')) {
+            'mysql' => $brandsQuery->select('id', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(name, '$." . app()->getLocale() . "')) as name_display"))->get()->pluck('name_display', 'id'),
+            'sqlite' => $brandsQuery->select('id', DB::raw("json_extract(name, '$." . app()->getLocale() . "') as name_display"))->get()->pluck('name_display', 'id'),
+            default => $brandsQuery->pluck('name', 'id'),
+        };
+
         return Inertia::render('Product/CreateOrEdit', [
             'product' => Product::query()
                 ->with('categories', 'variants.inventories', 'variants.values', 'types.values')
@@ -178,6 +196,8 @@ class AdminProductController extends Controller
                 ->findOrFail($id),
             'locations' => Location::query()
                 ->get(),
+            'categories' => Category::query()->pluck('name', 'id'),
+            'brands' => $brands,
         ]);
     }
 

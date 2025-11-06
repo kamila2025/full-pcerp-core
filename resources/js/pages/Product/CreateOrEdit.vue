@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useForm, router } from '@inertiajs/vue3'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -8,9 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '@/components/ui/tags-input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { History } from 'lucide-vue-next'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
+import { History, ChevronsUpDown, Check, X } from 'lucide-vue-next'
+import { cn } from '@/lib/utils'
 import AppHeader from '@/components/AppHeader.vue'
 import InputError from '@/components/InputError.vue'
 import VariantTable from './components/VariantTable.vue'
@@ -20,6 +23,8 @@ import VariantType from './components/VariantType.vue'
 const props = defineProps({
   product: Object,
   locations: Array,
+  categories: Object,
+  brands: Object,
 })
 
 const variant = ref({
@@ -70,6 +75,128 @@ const form = useForm({
   types: types.value || [],
   variants: variants.value || [variant.value],
 })
+
+// 分类相关逻辑
+const categoriesOpen = ref(false)
+const categorySearch = ref('')
+
+// 将 categories prop 转换为选项数组
+const categoryOptions = computed(() => {
+  if (!props.categories) return []
+  return Object.entries(props.categories).map(([id, name]) => ({
+    value: String(id),
+    label: String(name),
+  }))
+})
+
+// 已选择的分类名称
+const selectedCategoryNames = computed(() => form.categories || [])
+
+// 过滤后的分类选项（用于搜索）
+const filteredCategoryOptions = computed(() => {
+  if (!categorySearch.value) return categoryOptions.value
+  
+  const searchLower = categorySearch.value.toLowerCase()
+  return categoryOptions.value.filter(option => 
+    option.label.toLowerCase().includes(searchLower)
+  )
+})
+
+// 检查是否可以创建新分类（搜索内容不在现有分类中）
+const canCreateNewCategory = computed(() => {
+  if (!categorySearch.value.trim()) return false
+  const searchLower = categorySearch.value.trim().toLowerCase()
+  return !categoryOptions.value.some(option => 
+    option.label.toLowerCase() === searchLower
+  ) && !selectedCategoryNames.value.some(name => 
+    name.toLowerCase() === searchLower
+  )
+})
+
+// 选择分类
+const selectCategory = (categoryName) => {
+  if (!selectedCategoryNames.value.includes(categoryName)) {
+    form.categories = [...selectedCategoryNames.value, categoryName]
+  }
+  categorySearch.value = ''
+  categoriesOpen.value = false
+}
+
+// 创建新分类
+const createNewCategory = () => {
+  const newCategoryName = categorySearch.value.trim()
+  if (newCategoryName && !selectedCategoryNames.value.includes(newCategoryName)) {
+    form.categories = [...selectedCategoryNames.value, newCategoryName]
+  }
+  categorySearch.value = ''
+  categoriesOpen.value = false
+}
+
+// 移除分类
+const removeCategory = (categoryName) => {
+  form.categories = selectedCategoryNames.value.filter(name => name !== categoryName)
+}
+
+// 品牌相关逻辑
+const brandsOpen = ref(false)
+const brandSearch = ref('')
+
+// 将 brands prop 转换为选项数组
+const brandOptions = computed(() => {
+  if (!props.brands) return []
+  return Object.entries(props.brands).map(([id, name]) => ({
+    value: String(id),
+    label: String(name),
+  }))
+})
+
+// 已选择的品牌名称
+const selectedBrandNames = computed(() => form.brands || [])
+
+// 过滤后的品牌选项（用于搜索）
+const filteredBrandOptions = computed(() => {
+  if (!brandSearch.value) return brandOptions.value
+  
+  const searchLower = brandSearch.value.toLowerCase()
+  return brandOptions.value.filter(option => 
+    option.label.toLowerCase().includes(searchLower)
+  )
+})
+
+// 检查是否可以创建新品牌（搜索内容不在现有品牌中）
+const canCreateNewBrand = computed(() => {
+  if (!brandSearch.value.trim()) return false
+  const searchLower = brandSearch.value.trim().toLowerCase()
+  return !brandOptions.value.some(option => 
+    option.label.toLowerCase() === searchLower
+  ) && !selectedBrandNames.value.some(name => 
+    name.toLowerCase() === searchLower
+  )
+})
+
+// 选择品牌
+const selectBrand = (brandName) => {
+  if (!selectedBrandNames.value.includes(brandName)) {
+    form.brands = [...selectedBrandNames.value, brandName]
+  }
+  brandSearch.value = ''
+  brandsOpen.value = false
+}
+
+// 创建新品牌
+const createNewBrand = () => {
+  const newBrandName = brandSearch.value.trim()
+  if (newBrandName && !selectedBrandNames.value.includes(newBrandName)) {
+    form.brands = [...selectedBrandNames.value, newBrandName]
+  }
+  brandSearch.value = ''
+  brandsOpen.value = false
+}
+
+// 移除品牌
+const removeBrand = (brandName) => {
+  form.brands = selectedBrandNames.value.filter(name => name !== brandName)
+}
 
 const submit = () => {
   if (props.product) form.put(`/products/${props.product.id}`)
@@ -339,41 +466,169 @@ const submit = () => {
       <Card class="p-6 grid gap-4">
         <div class="grid gap-2">
           <Label for="categories">商品分類</Label>
-          <TagsInput
-            id="categories"
-            v-model="form.categories"
-          >
-            <TagsInputItem
-              v-for="item in form.categories"
-              :key="item"
-              :value="item"
+          <Popover v-model:open="categoriesOpen">
+            <PopoverTrigger as-child>
+              <Button
+                id="categories"
+                variant="outline"
+                role="combobox"
+                :aria-expanded="categoriesOpen"
+                class="w-full justify-between"
+              >
+                <span class="truncate">
+                  {{ selectedCategoryNames.length > 0 
+                    ? `${selectedCategoryNames.length} 個分類已選擇` 
+                    : '選擇或新增分類' }}
+                </span>
+                <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent class="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+              <Command>
+                <CommandInput 
+                  v-model="categorySearch"
+                  placeholder="搜尋分類..." 
+                />
+                <CommandList>
+                  <CommandEmpty>
+                    <div v-if="canCreateNewCategory" class="py-2">
+                      <Button
+                        variant="ghost"
+                        class="w-full justify-start"
+                        @click="createNewCategory"
+                      >
+                        新增「{{ categorySearch.trim() }}」
+                      </Button>
+                    </div>
+                    <span v-else>找不到分類</span>
+                  </CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      v-for="option in filteredCategoryOptions"
+                      :key="option.value"
+                      :value="option.label"
+                      @select="selectCategory(option.label)"
+                    >
+                      <Check
+                        :class="cn(
+                          'mr-2 h-4 w-4',
+                          selectedCategoryNames.includes(option.label) ? 'opacity-100' : 'opacity-0'
+                        )"
+                      />
+                      {{ option.label }}
+                    </CommandItem>
+                    <CommandItem
+                      v-if="canCreateNewCategory"
+                      @select="createNewCategory"
+                    >
+                      <span class="text-muted-foreground">新增「{{ categorySearch.trim() }}」</span>
+                    </CommandItem>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <div v-if="selectedCategoryNames.length > 0" class="flex flex-wrap gap-2 mt-2">
+            <Badge
+              v-for="categoryName in selectedCategoryNames"
+              :key="categoryName"
+              variant="secondary"
+              class="pr-1"
             >
-              <TagsInputItemText />
-              <TagsInputItemDelete />
-            </TagsInputItem>
-
-            <TagsInputInput placeholder="新增分類" />
-          </TagsInput>
+              {{ categoryName }}
+              <button
+                type="button"
+                class="ml-1 rounded-full hover:bg-secondary-foreground/20"
+                @click="removeCategory(categoryName)"
+              >
+                <X class="h-3 w-3" />
+              </button>
+            </Badge>
+          </div>
           <InputError :message="form.errors.categories" />
         </div>
 
         <div class="grid gap-2">
           <Label for="brands">商品品牌</Label>
-          <TagsInput
-            id="brands"
-            v-model="form.brands"
-          >
-            <TagsInputItem
-              v-for="item in form.brands"
-              :key="item"
-              :value="item"
+          <Popover v-model:open="brandsOpen">
+            <PopoverTrigger as-child>
+              <Button
+                id="brands"
+                variant="outline"
+                role="combobox"
+                :aria-expanded="brandsOpen"
+                class="w-full justify-between"
+              >
+                <span class="truncate">
+                  {{ selectedBrandNames.length > 0 
+                    ? `${selectedBrandNames.length} 個品牌已選擇` 
+                    : '選擇或新增品牌' }}
+                </span>
+                <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent class="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+              <Command>
+                <CommandInput 
+                  v-model="brandSearch"
+                  placeholder="搜尋品牌..." 
+                />
+                <CommandList>
+                  <CommandEmpty>
+                    <div v-if="canCreateNewBrand" class="py-2">
+                      <Button
+                        variant="ghost"
+                        class="w-full justify-start"
+                        @click="createNewBrand"
+                      >
+                        新增「{{ brandSearch.trim() }}」
+                      </Button>
+                    </div>
+                    <span v-else>找不到品牌</span>
+                  </CommandEmpty>
+                  <CommandGroup>
+                    <CommandItem
+                      v-for="option in filteredBrandOptions"
+                      :key="option.value"
+                      :value="option.label"
+                      @select="selectBrand(option.label)"
+                    >
+                      <Check
+                        :class="cn(
+                          'mr-2 h-4 w-4',
+                          selectedBrandNames.includes(option.label) ? 'opacity-100' : 'opacity-0'
+                        )"
+                      />
+                      {{ option.label }}
+                    </CommandItem>
+                    <CommandItem
+                      v-if="canCreateNewBrand"
+                      @select="createNewBrand"
+                    >
+                      <span class="text-muted-foreground">新增「{{ brandSearch.trim() }}」</span>
+                    </CommandItem>
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <div v-if="selectedBrandNames.length > 0" class="flex flex-wrap gap-2 mt-2">
+            <Badge
+              v-for="brandName in selectedBrandNames"
+              :key="brandName"
+              variant="secondary"
+              class="pr-1"
             >
-              <TagsInputItemText />
-              <TagsInputItemDelete />
-            </TagsInputItem>
-
-            <TagsInputInput placeholder="新增品牌" />
-          </TagsInput>
+              {{ brandName }}
+              <button
+                type="button"
+                class="ml-1 rounded-full hover:bg-secondary-foreground/20"
+                @click="removeBrand(brandName)"
+              >
+                <X class="h-3 w-3" />
+              </button>
+            </Badge>
+          </div>
           <InputError :message="form.errors.brands" />
         </div>
       </Card>
