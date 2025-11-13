@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 
-// Route::redirect('/', 'dashboard');
+// Route::redirect('/', 'dashboard'); test ploi notify
 
 /**
  * 外部服務整合路由
